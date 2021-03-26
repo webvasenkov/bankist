@@ -9,6 +9,8 @@ const navLinks = document.querySelector('.nav__links');
 const operationsTabContainer = document.querySelector('.operations__tab-container');
 const operationsContent = document.querySelectorAll('.operations__content');
 const section1 = document.querySelector('#section--1');
+const sections = document.querySelectorAll('.section');
+const images = document.querySelectorAll('img[data-src]');
 
 const toggleModal = function () {
   modal.classList.toggle('hidden');
@@ -56,23 +58,62 @@ const handleMouse = function (op) {
 // });
 
 // === Implement sticky-nav with IntersectionObserver API ===
-const handleStickyNav = (entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersection) {
-      nav.classList.remove('sticky');
-    } else {
-      nav.classList.add('sticky');
-    }
-  });
+const handleNavObserver = (entries) => {
+  const [entry] = entries;
+  if (entry.isIntersecting) {
+    nav.classList.remove('sticky');
+  } else {
+    nav.classList.add('sticky');
+  }
 };
 
-const observer = new IntersectionObserver(handleStickyNav, {
+const navObserver = new IntersectionObserver(handleNavObserver, {
   root: null,
   threshold: 0,
   rootMargin: `-${nav.getBoundingClientRect().height}px`,
 });
 
-observer.observe(header);
+navObserver.observe(header);
+
+const handleRevealObserver = (entries, observer) => {
+  const [entry] = entries;
+
+  if (!entry.isIntersecting) return;
+  entry.target.classList.remove('section--hidden');
+  observer.unobserve(entry.target);
+};
+
+const revealObserver = new IntersectionObserver(handleRevealObserver, {
+  root: null,
+  threshold: 0.15,
+});
+
+sections.forEach((section) => {
+  revealObserver.observe(section);
+  section.classList.add('section--hidden');
+});
+
+const handleLazyObserver = (entries, observer) => {
+  const [entry] = entries;
+  if (!entry.isIntersecting) return;
+
+  entry.target.src = entry.target.dataset.src;
+
+  entry.target.addEventListener('load', () => {
+    entry.target.classList.remove('lazy-img');
+  });
+
+  observer.unobserve(entry.target);
+};
+
+const lazyObserver = new IntersectionObserver(handleLazyObserver, {
+  root: null,
+  threshold: 0,
+});
+
+images.forEach((image) => lazyObserver.observe(image));
+
+// sections.forEach((section) => revealObserver.observe(section));
 
 // const handleMouse = function (e) {
 //   if (e.target.classList.contains('nav__link')) {
