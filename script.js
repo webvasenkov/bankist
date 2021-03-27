@@ -4,6 +4,7 @@ const overlay = document.querySelector('.overlay');
 const header = document.querySelector('.header');
 const btnCloseModal = document.querySelector('.btn--close-modal');
 const btnsOpenModal = document.querySelectorAll('.btn--show-modal');
+const btnScrollTo = document.querySelector('.btn--scroll-to');
 const nav = document.querySelector('.nav');
 const navLinks = document.querySelector('.nav__links');
 const operationsTabContainer = document.querySelector('.operations__tab-container');
@@ -27,6 +28,8 @@ document.addEventListener('keydown', function (e) {
     toggleModal();
   }
 });
+
+btnScrollTo.addEventListener('click', () => section1.scrollIntoView({ behavior: 'smooth' }));
 
 navLinks.addEventListener('click', function (e) {
   e.preventDefault();
@@ -141,6 +144,71 @@ operationsTabContainer.addEventListener('click', function (e) {
   tab.classList.add('operations__tab--active');
   document.querySelector(`.operations__content--${tab.dataset.tab}`).classList.add('operations__content--active');
 });
+
+// Slider
+
+const createSlider = () => {
+  // const slider = document.querySelector('.slider');
+  const slides = document.querySelectorAll('.slide');
+  const btnLeft = document.querySelector('.slider__btn--left');
+  const btnRight = document.querySelector('.slider__btn--right');
+  const dotContainer = document.querySelector('.dots');
+  let currentSlide = 0;
+
+  const createDots = () => {
+    slides.forEach((_, i) => {
+      const dot = `<button class="dots__dot" data-slide="${i}"/>`;
+      dotContainer.insertAdjacentHTML('beforeend', dot);
+    });
+  };
+
+  const activeDot = (slide = 0) => {
+    document.querySelectorAll('.dots__dot').forEach((dot) => dot.classList.remove('dots__dot--active'));
+    document.querySelector(`.dots__dot[data-slide="${slide}"]`).classList.add('dots__dot--active');
+  };
+
+  const goToSlide = (slide = 0) => {
+    slides.forEach((s, i) => (s.style.transform = `translateX(${(i - slide) * 100}%)`));
+    activeDot(slide);
+  };
+
+  const initial = () => {
+    createDots();
+    activeDot();
+    goToSlide();
+  };
+
+  initial();
+
+  const nextSlide = () => {
+    currentSlide++;
+    if (!(currentSlide % slides.length)) currentSlide = 0;
+    goToSlide(currentSlide);
+  };
+
+  const prevSlide = () => {
+    currentSlide--;
+    if (!~currentSlide) currentSlide = slides.length - 1;
+    goToSlide(currentSlide);
+  };
+
+  btnRight.addEventListener('click', nextSlide);
+  btnLeft.addEventListener('click', prevSlide);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'ArrowLeft') prevSlide();
+    else if (e.code === 'ArrowRight') nextSlide();
+    else return;
+  });
+
+  dotContainer.addEventListener('click', ({ target }) => {
+    const { slide } = target.dataset;
+    if (target.classList.contains('dots__dot')) goToSlide(slide);
+    else return;
+  });
+};
+
+createSlider();
 
 // === Lectures ===
 /*
@@ -332,4 +400,12 @@ const options = {
 
 const observer = new IntersectionObserver(handleIntersect, options);
 observer.observe(section1);
+
+// === Three useful events ===
+document.addEventListener('DOMContentLoaded', () => console.log('HTML parsed and DOM tree built!'));
+window.addEventListener('load', () => console.log('Page fully loaded!'));
+window.addEventListener('beforeunload', (e) => {
+  e.preventDefault();
+  console.log(e);
+});
 */
